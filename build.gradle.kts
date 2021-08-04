@@ -19,6 +19,7 @@ dependencies {
     implementation("com.github.elbekD:kt-telegram-bot:1.3.5")
     implementation("org.twitter4j:twitter4j-core:4.0.7")
     implementation("io.github.microutils:kotlin-logging:1.7.8")
+    implementation("org.slf4j:slf4j-simple:1.7.21")
 }
 
 tasks.test {
