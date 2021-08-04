@@ -9,9 +9,7 @@ class InstagramMediaRetriever : MediaRetriever {
                 page.select(it).first()?.attr("content")
             }
             .map {
-                val tempName = it.split("/")
-                val filename = tempName[tempName.lastIndex].split("?")[0]
-                Content(it, filename, mediaType(filename))
+                convertUrlToContentObject(it)
             }
             .take(1)
     }

@@ -12,14 +12,21 @@ const val IS_PROD = "IS_PROD"
 const val BOT_TOKEN = "BOT_TOKEN"
 const val BOT_USERNAME = "BOT_USERNAME"
 const val OWNER_ID = "OWNER_ID"
+const val TWITTER_API_KEY = "TWITTER_API_KEY"
+const val TWITTER_API_SECRET = "TWITTER_API_SECRET"
+const val TWITTER_ACCESS_TOKEN = "TWITTER_ACCESS_TOKEN"
+const val TWITTER_ACCESS_SECRET = "TWITTER_ACCESS_SECRET"
 
-var directory = "D:\\00scraper"
 val USER_AGENT =
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36";
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
 
 lateinit var token: String
 lateinit var username: String
 lateinit var ownerId: String
+lateinit var twitterApiKey: String
+lateinit var twitterApiSecret: String
+lateinit var twitterAccessToken: String
+lateinit var twitterAccessSecret: String
 var isProd = false
 
 private val logger = KotlinLogging.logger {}
@@ -43,6 +50,10 @@ private fun loadProperties() {
         token = System.getenv()[BOT_TOKEN].toString()
         username = System.getenv()[BOT_USERNAME].toString()
         ownerId = System.getenv()[OWNER_ID].toString()
+        twitterApiKey = System.getenv()[TWITTER_API_KEY].toString()
+        twitterApiSecret = System.getenv()[TWITTER_API_SECRET].toString()
+        twitterAccessToken = System.getenv()[TWITTER_ACCESS_TOKEN].toString()
+        twitterAccessSecret = System.getenv()[TWITTER_ACCESS_SECRET].toString()
     } else {
         logger.info { "setup test environment" }
         val properties = Properties()
@@ -52,6 +63,10 @@ private fun loadProperties() {
         token = properties.getProperty(BOT_TOKEN)
         username = properties.getProperty(BOT_USERNAME)
         ownerId = properties.getProperty(OWNER_ID)
+        twitterApiKey = properties.getProperty(TWITTER_API_KEY)
+        twitterApiSecret = properties.getProperty(TWITTER_API_SECRET)
+        twitterAccessToken = properties.getProperty(TWITTER_ACCESS_TOKEN)
+        twitterAccessSecret = properties.getProperty(TWITTER_ACCESS_SECRET)
     }
 }
 
@@ -61,18 +76,25 @@ private fun setBehaviour() {
 
 fun onChannelPost() {
     val instagram = InstagramMediaRetriever()
+    val twitter = TwitterMediaRetriever()
     bot.onChannelPost { message ->
         val (chatId, messageId, url) = getChatIdAndMessageIdAndTextFromMessage(message)
         if (url != null && validateURL(url) && !validateMediaType(url)) {
-            val mediaUrl = when (mediaSource(url)) {
+            val mediaContent = when (mediaSource(url)) {
                 MediaSource.INSTAGRAM -> instagram.retrieveMedia(url)
-                MediaSource.TWITTER -> retrieveTwitterMedia(url)
+                MediaSource.TWITTER -> twitter.retrieveMedia(url)
                 else -> retrieveOtherMedia(url)
             }
-            mediaUrl.forEach {
-                when (it.mediaType) {
-                    MediaType.VIDEO -> sendVideo(chatId, messageId, it.url)
-                    MediaType.IMAGE -> sendImage(chatId, messageId, it.url)
+
+            if (mediaContent.size > 1) {
+                val content = mediaContent.first()
+                when (content.mediaType) {
+                    MediaType.VIDEO -> sendVideo(chatId, messageId, content.url)
+                    MediaType.IMAGE -> sendImage(chatId, messageId, content.url)
+                }
+            } else {
+                mediaContent.chunked(10).map { mediaGroup ->
+                    sendMediaGroup(chatId, messageId, mediaGroup)
                 }
             }
         }
@@ -99,6 +121,17 @@ fun sendImage(chatId: Long, messageId: Int, imageUrl: String) {
     deleteMessage(chatId, messageId)
 }
 
+fun sendMediaGroup(chatId: Long, messageId: Int, content: List<Content>) {
+    bot.sendMediaGroup(chatId, content.mapNotNull {
+        when (it.mediaType) {
+            MediaType.VIDEO -> bot.mediaVideo(it.url)
+            MediaType.IMAGE -> bot.mediaPhoto(it.url)
+            else -> null
+        }
+    })
+    deleteMessage(chatId, messageId)
+}
+
 fun deleteMessage(chatId: Long, messageId: Int) {
     bot.deleteMessage(chatId, messageId)
 }
@@ -115,7 +148,7 @@ private data class ChatIdAndText(val chatId: Long, val text: String?)
 
 private data class ChatIdAndMessageIdAndText(val chatId: Long, val messageId: Int, val text: String?)
 
-fun download(url: String) {
+fun download(url: String, directory: String) {
     val tempName = url.split("/")
     val filename = tempName[tempName.lastIndex].split("?")[0]
 
@@ -147,6 +180,11 @@ fun mediaType(fileName: String): MediaType {
     } else {
         MediaType.UNKNOWN
     }
+}
+
+fun getLastPathValue(path: String): String {
+    val tempName = path.split("/")
+    return tempName[tempName.lastIndex].split("?")[0]
 }
 
 enum class MediaType {
