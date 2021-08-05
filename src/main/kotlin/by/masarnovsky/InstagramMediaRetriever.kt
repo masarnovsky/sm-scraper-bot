@@ -1,3 +1,5 @@
+package by.masarnovsky
+
 import org.jsoup.Jsoup
 
 

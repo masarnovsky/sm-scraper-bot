@@ -1,3 +1,5 @@
+package by.masarnovsky
+
 interface MediaRetriever {
     fun retrieveMedia(url: String): List<Content>
 

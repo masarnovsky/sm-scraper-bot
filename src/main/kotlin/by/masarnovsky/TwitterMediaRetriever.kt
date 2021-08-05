@@ -1,3 +1,5 @@
+package by.masarnovsky
+
 import twitter4j.TwitterFactory
 import twitter4j.conf.ConfigurationBuilder
 
@@ -21,7 +23,7 @@ class TwitterMediaRetriever : MediaRetriever {
             .mapNotNull { mediaEntity ->
                 if (mediaEntity.type == "photo") {
                     mediaEntity.mediaURL!!
-                } else if (mediaEntity.type == "animated_gif" && mediaEntity.videoVariants.isNotEmpty()) {
+                } else if ((mediaEntity.type == "animated_gif" || mediaEntity.type == "video") && mediaEntity.videoVariants.isNotEmpty()) {
                     mediaEntity.videoVariants.mapNotNull { it.url }.first()
                 } else {
                     null

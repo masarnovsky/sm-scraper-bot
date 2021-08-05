@@ -1,3 +1,5 @@
+package by.masarnovsky
+
 import com.elbekD.bot.Bot
 import com.elbekD.bot.types.Message
 import mu.KotlinLogging
@@ -86,13 +88,13 @@ fun onChannelPost() {
                 else -> retrieveOtherMedia(url)
             }
 
-            if (mediaContent.size > 1) {
+            if (mediaContent.size == 1) {
                 val content = mediaContent.first()
                 when (content.mediaType) {
                     MediaType.VIDEO -> sendVideo(chatId, messageId, content.url)
                     MediaType.IMAGE -> sendImage(chatId, messageId, content.url)
                 }
-            } else {
+            } else if (mediaContent.size > 1) {
                 mediaContent.chunked(10).map { mediaGroup ->
                     sendMediaGroup(chatId, messageId, mediaGroup)
                 }
