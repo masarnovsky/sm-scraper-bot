@@ -51,13 +51,3 @@ fun getChatIdAndMessageIdAndTextFromMessage(message: Message): ChatIdAndMessageI
 data class ChatIdAndText(val chatId: Long, val text: String?)
 
 data class ChatIdAndMessageIdAndText(val chatId: Long, val messageId: Int, val text: String?)
-
-fun download(url: String, directory: String) {
-    val tempName = url.split("/")
-    val filename = tempName[tempName.lastIndex].split("?")[0]
-
-    URI.create(url).toURL().openStream()?.use { inputStream ->
-        val toPath = File(directory.plus(File.separator).plus(filename)).toPath()
-        Files.copy(inputStream, toPath, StandardCopyOption.REPLACE_EXISTING)
-    }
-}
