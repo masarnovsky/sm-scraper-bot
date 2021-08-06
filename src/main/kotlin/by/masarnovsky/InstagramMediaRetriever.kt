@@ -13,11 +13,13 @@ class InstagramMediaRetriever : MediaRetriever {
         logger.info { "trying to retrieve instagram media from:$url" }
 
         val page = Jsoup.connect(url).userAgent(USER_AGENT).get()
+        logger.info { "$page" }
         return listOf("meta[property=og:video]", "meta[property=og:image]")
             .mapNotNull {
                 page.select(it).first()?.attr("content")
             }
             .map {
+                logger.info { it }
                 convertUrlToContentObject(it)
             }
             .take(1)

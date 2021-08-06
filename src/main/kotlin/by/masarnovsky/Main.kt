@@ -88,6 +88,8 @@ fun onChannelPost() {
                 mediaContent.chunked(10).map { mediaGroup ->
                     sendMediaGroup(chatId, messageId, mediaGroup)
                 }
+            } else {
+                logger.info { "media not found" }
             }
         }
     }
