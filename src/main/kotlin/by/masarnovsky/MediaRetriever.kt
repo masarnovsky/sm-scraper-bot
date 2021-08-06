@@ -8,3 +8,5 @@ interface MediaRetriever {
         return Content(url, filename, mediaType(filename))
     }
 }
+
+data class Content(val url: String, val fileName: String, val mediaType: MediaType)

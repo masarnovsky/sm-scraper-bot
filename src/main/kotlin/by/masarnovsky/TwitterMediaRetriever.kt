@@ -3,6 +3,11 @@ package by.masarnovsky
 import twitter4j.TwitterFactory
 import twitter4j.conf.ConfigurationBuilder
 
+lateinit var twitterApiKey: String
+lateinit var twitterApiSecret: String
+lateinit var twitterAccessToken: String
+lateinit var twitterAccessSecret: String
+
 class TwitterMediaRetriever : MediaRetriever {
     override fun retrieveMedia(url: String): List<Content> {
         val twitId = getLastPathValue(url)
