@@ -15,12 +15,18 @@ fun mediaSource(url: String): MediaSource {
 }
 
 fun mediaType(fileName: String): MediaType {
-    return if (fileName.endsWith(".mp4")) {
-        MediaType.VIDEO
-    } else if (fileName.endsWith(".png") || fileName.endsWith(".jpg")) {
-        MediaType.IMAGE
-    } else {
-        MediaType.UNKNOWN
+    val temp = fileName.split(".")
+    val extension = temp[temp.lastIndex]
+    return when {
+        listOf("mp4", "m3u8").contains(extension) -> {
+            MediaType.VIDEO
+        }
+        listOf("png", "jpg").contains(extension) -> {
+            MediaType.IMAGE
+        }
+        else -> {
+            MediaType.UNKNOWN
+        }
     }
 }
 

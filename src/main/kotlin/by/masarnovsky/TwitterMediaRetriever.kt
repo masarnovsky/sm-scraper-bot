@@ -29,7 +29,11 @@ class TwitterMediaRetriever : MediaRetriever {
                 if (mediaEntity.type == "photo") {
                     mediaEntity.mediaURL!!
                 } else if ((mediaEntity.type == "animated_gif" || mediaEntity.type == "video") && mediaEntity.videoVariants.isNotEmpty()) {
-                    mediaEntity.videoVariants.mapNotNull { it.url }.first()
+                    mediaEntity.videoVariants
+                        .filter { it.contentType == "video/mp4" }
+                        .sortedByDescending { it.bitrate }
+                        .mapNotNull { it.url }
+                        .first()
                 } else {
                     null
                 }
